@@ -1,6 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<c:import url="/WEB-INF/jsp/header.jsp" />
+<c:set var="pageTitle" value="Login"/>
+<%@include file="/WEB-INF/jsp/common/header.jsp"%>
 
 <script type="text/javascript">
 	$(document).ready(function () {
@@ -25,24 +26,26 @@
 	});
 </script>
 
-<div class="row">
-	<div class="col-sm-4"></div>
-	<div class="col-sm-4">
-		<c:url var="formAction" value="/login" />
+
+ <div class="row center-align">
+    <div class="col s12 m6 offset-m3">
+      <div class="card-panel white darken-1">
+      	<h5 class="grey-text darken-2">TradeMine Account</h5>
+      	<br />
+        <c:url var="formAction" value="/login" />
 		<form method="POST" action="${formAction}">
 		<input type="hidden" name="destination" value="${param.destination}"/>
 		<input type="hidden" name="CSRF_TOKEN" value="${CSRF_TOKEN}"/>
-			<div class="form-group">
-				<label for="userName">User Name: </label>
-				<input type="text" id="userName" name="userName" placeHolder="User Name" class="form-control" />
+			<div class="input-field">
+				<input type="text" id="userName" name="userName" placeholder="Username" class="validate" required />
 			</div>
-			<div class="form-group">
-				<label for="password">Password: </label>
-				<input type="password" id="password" name="password" placeHolder="Password" class="form-control" />
+			<div class="input-field">
+				<input type="password" id="password" name="password" placeholder="Password" class="validate" required />
 			</div>
 			<button type="submit" class="btn btn-default">Login</button>
 		</form>
-	</div>
-	<div class="col-sm-4"></div>
-</div>
-<c:import url="/WEB-INF/jsp/footer.jsp" />
+      </div>
+    </div>
+  </div>
+        
+<c:import url="/WEB-INF/jsp/common/footer.jsp" />
