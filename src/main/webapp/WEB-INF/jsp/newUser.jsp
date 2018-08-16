@@ -45,7 +45,7 @@
 <div class="row center-align">
 	<div class="col s12 m6 offset-m3">
 		<div class="card-panel white darken-1">
-			<h5 class="grey-text darken-2">Sign Up For A TradeMine Account</h5>
+			<h5 class="grey-text text-darken-2">Sign Up For A TradeMine Account</h5>
 			<br />
 			<c:url var="formAction" value="/users" />
 			<form method="POST" action="${formAction}">
@@ -56,7 +56,7 @@
 				</div>
 				<div class="input-field">
 					<input type="password" id="password" name="password"
-						placeholder="Password" class="validate" required />
+						placeholder="Password" class="validate" minlength="15" required />
 				</div>
 				<div class="input-field">
 					<input type="password" id="confirmPassword" name="confirmPassword"

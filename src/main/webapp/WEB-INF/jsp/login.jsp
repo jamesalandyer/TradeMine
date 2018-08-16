@@ -30,7 +30,7 @@
  <div class="row center-align">
     <div class="col s12 m6 offset-m3">
       <div class="card-panel white darken-1">
-      	<h5 class="grey-text darken-2">TradeMine Account</h5>
+      	<h5 class="grey-text text-darken-2">Welcome To TradeMine!</h5>
       	<br />
         <c:url var="formAction" value="/login" />
 		<form method="POST" action="${formAction}">
@@ -44,6 +44,8 @@
 			</div>
 			<button type="submit" class="btn btn-default">Login</button>
 		</form>
+		<br />
+		<a href="/capstone/users/new" class="waves-effect waves-teal btn-flat">Don't Have An Account? Sign Up!</a>
       </div>
     </div>
   </div>

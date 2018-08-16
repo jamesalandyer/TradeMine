@@ -37,7 +37,7 @@ public class AuthenticationController {
 			if(destination != null && ! destination.isEmpty()) {
 				return "redirect:" + destination;
 			} else {
-				return "redirect:/users/"+userName;
+				return "redirect:/";
 			}
 		} else {
 			return "redirect:/login";

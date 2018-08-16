@@ -1,5 +1,6 @@
 package com.techelevator.controller;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,5 +45,12 @@ public class UserController {
 		return "redirect:/login";
 	}
 	
+	@RequestMapping(path="/users/invites", method=RequestMethod.GET)
+	public String displayUserInvites(ModelMap modelHolder, HttpSession session) {
+		if(session.getAttribute("currentUser") == null) {
+			return "redirect:/login";
+		}
+		return "invites";
+	}
 	
 }
