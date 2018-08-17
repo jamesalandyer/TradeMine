@@ -13,6 +13,8 @@
 <script src="/capstone/js/materialize.min.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
 	rel="stylesheet">
+	<link rel="stylesheet" type="text/css"
+	href="/capstone/css/normalize.css">
 <link rel="stylesheet" type="text/css"
 	href="/capstone/css/materialize.min.css">
 <link rel="stylesheet" type="text/css" href="/capstone/css/styles.css">
