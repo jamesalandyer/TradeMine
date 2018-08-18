@@ -51,7 +51,7 @@ public class JDBCGameDAO implements GameDAO {
 
 		SqlRowSet game = jdbcTemplate.queryForRowSet(sqlGetGame, gameId);
 		if (game.next()) {
-			return mapRowToGame(game);
+			return mapRowToGame(game, false);
 		}
 		return null;
 	}
@@ -61,25 +61,28 @@ public class JDBCGameDAO implements GameDAO {
 		String sqlGetGames = "SELECT g.game_id, g.game_name, g.creator_id, g.end_date, count(p.user_id) AS player_count "
 				+ "FROM game g "
 				+ "INNER JOIN player p ON g.game_id = p.game_id "
-				+ "WHERE g.game_id IN (select game_id FROM player WHERE user_id = ?) "
-				+ "AND p.joined = TRUE "
-				+ "GROUP BY g.game_id";
+				+ "WHERE p.user_id = ? "
+				+ "AND p.joined IS TRUE "
+				+ "GROUP BY g.game_id "
+				+ "ORDER BY g.game_id DESC";
 
 		SqlRowSet games = jdbcTemplate.queryForRowSet(sqlGetGames, userId);
 		List<Game> userGames = new ArrayList<>();
 		while (games.next()) {
-			userGames.add(mapRowToGame(games));
+			userGames.add(mapRowToGame(games, true));
 		}
 		return userGames;
 	}
 
-	private Game mapRowToGame(SqlRowSet row) {
+	private Game mapRowToGame(SqlRowSet row, boolean addPlayers) {
 		Game game = new Game();
 		game.setGameId(row.getLong("game_id"));
 		game.setGameName(row.getString("game_name"));
 		game.setCreatorId(row.getLong("creator_id"));
 		game.setEndDate(row.getString("end_date"));
-		game.setPlayerCount(row.getInt("player_count"));
+		if (addPlayers) {
+			game.setPlayerCount(row.getInt("player_count"));
+		}
 		return game;
 	}
 

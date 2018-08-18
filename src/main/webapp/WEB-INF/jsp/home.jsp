@@ -4,20 +4,23 @@
 <%@include file="/WEB-INF/jsp/common/header.jsp"%>
 
 <script type="text/javascript">
-	$(document).ready(function() {
-		$('.modal').modal();
-		$('.datepicker').datepicker({
-			container : 'body',
-			minDate : new Date()
-		});
-		$('.fixed-action-btn').floatingActionButton()
-		$("#createGame").click(function(event) {
-			var isValid = ($("#datepicker").val() != "" && $("#name").val() != "") ;
-		    if(isValid) {
-		    	$("#createForm").submit();
-		    }
-		});
-	});
+	$(document).ready(
+			function() {
+				$('.modal').modal();
+				$('.datepicker').datepicker({
+					container : 'body',
+					minDate : new Date()
+				});
+				$('.fixed-action-btn').floatingActionButton();
+				$("#createGame").click(
+						function(event) {
+							var isValid = ($("#datepicker").val() != "" && $(
+									"#name").val() != "");
+							if (isValid) {
+								$("#createForm").submit();
+							}
+						});
+			});
 </script>
 <div id="addGame" class="modal modal-fixed-footer">
 	<div class="modal-content">
@@ -53,40 +56,57 @@
 	</div>
 	<div class="modal-footer">
 		<a href="#!" class="modal-close waves-effect waves-teal btn-flat">Cancel</a>
-		&nbsp; <a id="createGame"
-			class="waves-effect waves-teal btn">Create</a>
+		&nbsp; <a id="createGame" class="waves-effect waves-teal btn">Create</a>
 	</div>
 </div>
 <div class="row">
-<c:forEach var="game" items="${gamesList}">
-	<div class="col s12 m12 xl6">
-		<div class="card grey lighten-5 grey-text text-darken-2">
-			<div class="card-content">
-				<span class="card-title"><c:out value="${game.gameName.toUpperCase()}" /></span>
-				<hr />
-				<h5>
-					<i
-						class="material-icons circle grey darken-2 small white-text left">show_chart</i>
-					$4,390,399.00
-				</h5>
-				<h5>
-					<i
-						class="material-icons circle grey darken-2 small white-text left">group</i>
-					<c:out value="${game.playerCount}" /> <c:out value="${(game.playerCount) > 1 ? 'People' : 'Person'}" />
-				</h5>
-				<h5>
-					<i
-						class="material-icons circle grey darken-2 small white-text left">close</i>
-					<c:out value="${game.endDate}" />
-				</h5>
+	<c:choose>
+		<c:when test="${gamesList.size() > 0}">
+			<c:forEach begin="0" end="${gamesList.size() - 1}" var="index">
+				<c:set var="game" value="${gamesList.get(index)}" />
+				<c:set var="balance" value="${gameBalances.get(index)}" />
+				<div class="col s12 m12 xl6">
+					<div class="card grey lighten-5 grey-text text-darken-2">
+						<div class="card-content">
+							<span class="card-title"><c:out
+									value="${game.gameName.toUpperCase()}" /></span>
+							<hr />
+							<h5>
+								<i
+									class="material-icons circle grey darken-2 small white-text left">attach_money</i>
+								<c:out value="${balance}" />
+							</h5>
+							<h5>
+								<i
+									class="material-icons circle grey darken-2 small white-text left">group</i>
+								<c:out value="${game.playerCount}" />
+								<c:out value="${(game.playerCount) > 1 ? 'People' : 'Person'}" />
+							</h5>
+							<h5>
+								<i
+									class="material-icons circle grey darken-2 small white-text left">close</i>
+								<c:out value="${game.endDate}" />
+							</h5>
+						</div>
+						<div class="card-action">
+							<form action="/capstone/game" method="GET">
+								<input type="hidden" name="gameId" value="${ game.gameId }">
+								<button type="submit" class="btn waves-effect waves-light">View
+									Game</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</c:forEach>
+		</c:when>
+		<c:otherwise>
+			<div class="col s12 center-align grey-text text-darken-3">
+				<h3>You currently are in no games!</h3>
+				<h5>Create a new one to get started!</h5>
 			</div>
-			<div class="card-action">
-				<a href="/capstone/game" class="btn waves-effect waves-light">View
-					Game</a>
-			</div>
-		</div>
-	</div>
-</c:forEach>
+		</c:otherwise>
+	</c:choose>
+
 	<div class="fixed-action-btn">
 		<a
 			class="waves-effect waves-light btn-floating btn-large teal btn modal-trigger"

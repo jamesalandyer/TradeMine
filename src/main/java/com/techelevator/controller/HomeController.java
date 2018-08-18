@@ -1,44 +1,72 @@
 package com.techelevator.controller;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.techelevator.model.Game;
 import com.techelevator.model.GameDAO;
+import com.techelevator.model.Player;
+import com.techelevator.model.PlayerDAO;
 import com.techelevator.model.User;
+import com.techelevator.model.UserDAO;
 
 @Controller
 public class HomeController {
 	
 	private GameDAO gameDAO;
+	private PlayerDAO playerDAO;
+	private UserDAO userDAO;
 
 	@Autowired
-	public HomeController(GameDAO gameDAO) {
+	public HomeController(GameDAO gameDAO, PlayerDAO playerDAO, UserDAO userDAO) {
 		this.gameDAO = gameDAO;
+		this.playerDAO = playerDAO;
+		this.userDAO = userDAO;
 	}
 	
 	@RequestMapping(path="/", method=RequestMethod.GET)
 	public String displayHome(HttpServletRequest request, HttpSession session) {
-		if(session.getAttribute("currentUser") == null) {
+		Object user = session.getAttribute("currentUser");
+		if(user == null) {
 			return "redirect:/login";
 		}
-		
-		request.setAttribute("gamesList", gameDAO.getGamesWithUser(((User) session.getAttribute("currentUser")).getUserId()));
+		Long userId = ((User) user).getUserId();
+		request.setAttribute("playerInvites", playerDAO.getInvitesForUser(userId));
+		request.setAttribute("gamesList", gameDAO.getGamesWithUser(userId));
+		request.setAttribute("gameBalances", playerDAO.getPlayerBalanceForGames(userId));
 		
 		return "home";
 	}
 	
 	@RequestMapping(path="/game", method=RequestMethod.GET)
-	public String displayGame(HttpSession session) {
-		if(session.getAttribute("currentUser") == null) {
+	public String displayGame(HttpServletRequest request, HttpSession session, @ModelAttribute("gameId") Long gameId) {
+		Object user = session.getAttribute("currentUser");
+		if(user == null) {
 			return "redirect:/login";
 		}
+		Long userId = ((User) user).getUserId();
+		request.setAttribute("playerInvites", playerDAO.getInvitesForUser(userId));
+		request.setAttribute("game", gameDAO.getGame(gameId));
+		List<Player> gamePlayers = playerDAO.getPlayersForGame(gameId);
+		request.setAttribute("players", gamePlayers.stream().filter(player -> player.isJoined()).collect(Collectors.toList()));
+		BigDecimal total = gamePlayers.stream().map(player -> player.getAmountLeft()).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		request.setAttribute("total", formatter.format(total));
+		request.setAttribute("users", userDAO.getAllUsers().stream()
+			.filter(u -> gamePlayers.stream()
+					.map(player -> player.getUserId()).collect(Collectors.toList()).contains(u.getUserId()) == false).collect(Collectors.toList()));
 		
 		return "game";
 	}

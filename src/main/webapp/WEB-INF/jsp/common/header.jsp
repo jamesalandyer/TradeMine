@@ -39,14 +39,18 @@
 			<div class="nav-wrapper teal lighten-1">
 				<div class="container">
 					<img src="/capstone/img/logo.png" height="100%" class="brand-logo" />
-					<a href="#" data-target="mobile-demo" class="sidenav-trigger"><i
+					<a href="#" data-target="mobile-nav" class="sidenav-trigger"><i
 						class="material-icons">menu</i></a>
 					<ul id="nav-mobile" class="right hide-on-med-and-down">
 						<c:if test="${not empty currentUser}">
 							<c:url var="homePageHref" value="/" />
 							<li><a href="${homePageHref}">Home</a></li>
-							<c:url var="invitesHref" value="/users/invites" />
-							<li><a href="${invitesHref}">Invites <span class="new badge teal-text white">6</span></a></li>
+							<c:url var="invitesHref" value="/invites" />
+							<li><a href="${invitesHref}">Invites
+							<c:if test="${playerInvites.size() > 0}">
+								&nbsp;<span class="new badge teal-text white"><c:out value="${playerInvites.size()}" /></span>
+							</c:if>
+							</a></li>
 							<li><c:url var="logoutAction" value="/logout" />
 								<form id="logoutForm" action="${logoutAction}" method="POST">
 									<input type="hidden" name="CSRF_TOKEN" value="${CSRF_TOKEN}" />
@@ -57,12 +61,15 @@
 							<li><a href="${loginHref}">Log In</a></li>
 						</c:if>
 					</ul>
-					<ul class="sidenav" id="mobile-demo">
+					<ul class="sidenav" id="mobile-nav">
 						<c:if test="${not empty currentUser}">
 							<c:url var="homePageHref" value="/" />
 							<li><a href="${homePageHref}">Home</a></li>
-							<c:url var="invitesHref" value="/users/invites" />
-							<li><a href="${invitesHref}">Invites</a></li>
+							<c:url var="invitesHref" value="/invites" />
+							<li><a href="${invitesHref}">Invites
+							<c:if test="${playerInvites.size() > 0}">
+								&nbsp;<span class="new badge white-text teal"><c:out value="${playerInvites.size()}" /></span>
+							</c:if></a></li>
 							<li><a class="logoutLink" href="#">Log Out</a></li>
 						</c:if>
 						<c:if test="${empty currentUser}">
