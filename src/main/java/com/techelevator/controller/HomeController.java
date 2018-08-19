@@ -10,7 +10,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,22 +51,24 @@ public class HomeController {
 		return "home";
 	}
 	
-	@RequestMapping(path="/game", method=RequestMethod.GET)
-	public String displayGame(HttpServletRequest request, HttpSession session, @ModelAttribute("gameId") Long gameId) {
+	@RequestMapping(path="/game/{gameId}", method=RequestMethod.GET)
+	public String displayGame(HttpServletRequest request, HttpSession session, @PathVariable Long gameId) {
 		Object user = session.getAttribute("currentUser");
 		if(user == null) {
 			return "redirect:/login";
 		}
+		
 		Long userId = ((User) user).getUserId();
 		request.setAttribute("playerInvites", playerDAO.getInvitesForUser(userId));
 		request.setAttribute("game", gameDAO.getGame(gameId));
-		List<Player> gamePlayers = playerDAO.getPlayersForGame(gameId);
-		request.setAttribute("players", gamePlayers.stream().filter(player -> player.isJoined()).collect(Collectors.toList()));
+		List<Player> allPlayers = playerDAO.getPlayersForGame(gameId);
+		List<Player> gamePlayers = allPlayers.stream().filter(player -> player.isJoined()).collect(Collectors.toList());
+		request.setAttribute("players", gamePlayers);
 		BigDecimal total = gamePlayers.stream().map(player -> player.getAmountLeft()).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 		request.setAttribute("total", formatter.format(total));
 		request.setAttribute("users", userDAO.getAllUsers().stream()
-			.filter(u -> gamePlayers.stream()
+			.filter(u -> allPlayers.stream()
 					.map(player -> player.getUserId()).collect(Collectors.toList()).contains(u.getUserId()) == false).collect(Collectors.toList()));
 		
 		return "game";

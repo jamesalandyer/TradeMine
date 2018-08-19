@@ -72,13 +72,13 @@
 		<h5>
 			<i class="material-icons circle grey darken-3 small white-text left">group</i>
 			<c:out value="${players.size()}" />
-			<c:out value="${(players.size() > 1) ? ' People' : ' Person'}" />
+			<c:out value="${players.size() > 1 ? ' People' : ' Person'}" />
 		</h5>
 		<h5>
 			<i class="material-icons circle grey darken-3 small white-text left">close</i>
 			<c:out value="${game.endDate}" />
 		</h5>
-		<br /> <a class="waves-effect waves-light btn"><i
+		<br /> <a href="/capstone/game/${game.gameId}/${currentUser.userName}" class="waves-effect waves-light btn"><i
 			class="material-icons left">account_balance</i>Your Portfolio</a>
 	</div>
 </div>

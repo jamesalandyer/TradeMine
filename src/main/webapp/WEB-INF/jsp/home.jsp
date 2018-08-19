@@ -89,11 +89,8 @@
 							</h5>
 						</div>
 						<div class="card-action">
-							<form action="/capstone/game" method="GET">
-								<input type="hidden" name="gameId" value="${ game.gameId }">
-								<button type="submit" class="btn waves-effect waves-light">View
-									Game</button>
-							</form>
+							<a href="/capstone/game/${game.gameId}"
+								class="btn waves-effect waves-light">View Game</a>
 						</div>
 					</div>
 				</div>

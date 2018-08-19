@@ -57,29 +57,28 @@ public class PlayerController {
 		
 		redirectAttrs.addFlashAttribute("gameId", gameId);
 		
-		return "redirect:/game";
+		return "redirect:/game/" + gameId;
 	}
 	
 	@RequestMapping(path="/invites/confirm", method=RequestMethod.POST)
-	public String createGame(HttpSession session, @RequestParam Long inviteeId, @RequestParam Long gameId, RedirectAttributes redirectAttrs) {
+	public String confirmInvite(HttpSession session, @RequestParam String accept, @RequestParam Long gameId) {
 		User user = (User) session.getAttribute("currentUser");
 		if(user == null) {
 			return "redirect:/login";
 		}
 		
-		Player newPlayer = new Player();
+		Player player = new Player();
 		
-		newPlayer.setAmountLeft(new BigDecimal(100000));
-		newPlayer.setGameId(gameId);
-		newPlayer.setInviterId(user.getUserId());
-		newPlayer.setJoined(false);
-		newPlayer.setUserId(inviteeId);
+		player.setGameId(gameId);
+		player.setUserId(user.getUserId());
 		
-		playerDAO.savePlayer(newPlayer);
+		if (accept.equals("true")) {
+			playerDAO.acceptInvite(player);
+		} else {
+			playerDAO.declineInvite(player);
+		}
 		
-		redirectAttrs.addFlashAttribute("gameId", gameId);
-		
-		return "redirect:/game";
+		return "redirect:/invites";
 	}
 	
 }

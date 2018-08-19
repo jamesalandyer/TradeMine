@@ -34,7 +34,8 @@ public class JDBCPlayerDAO implements PlayerDAO {
 		String sqlGetPlayers = "SELECT p.amount_left, p.inviter_id, p.joined, p.user_id, p.game_id, u.user_name "
 				+ "FROM player p "
 				+ "INNER JOIN app_user u ON p.user_id = u.id "
-				+ "WHERE game_id = ?";
+				+ "WHERE game_id = ? "
+				+ "ORDER BY p.amount_left ";
 
 		SqlRowSet players = jdbcTemplate.queryForRowSet(sqlGetPlayers, gameId);
 		List<Player> allPlayers = new ArrayList<>();

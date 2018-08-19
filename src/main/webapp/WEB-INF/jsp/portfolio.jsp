@@ -1,6 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
-<c:set var="pageTitle" value="Invites" />
+<c:set var="pageTitle" value="Portfolio" />
 <%@include file="/WEB-INF/jsp/common/header.jsp"%>
 
 <script type="text/javascript">
