@@ -10,7 +10,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,6 +58,9 @@ public class HomeController {
 		}
 		
 		Long userId = ((User) user).getUserId();
+		if(!playerDAO.getPlayerForGame(userId, gameId).isJoined()) {
+			return "redirect:/";
+		}
 		request.setAttribute("playerInvites", playerDAO.getInvitesForUser(userId));
 		request.setAttribute("game", gameDAO.getGame(gameId));
 		List<Player> allPlayers = playerDAO.getPlayersForGame(gameId);

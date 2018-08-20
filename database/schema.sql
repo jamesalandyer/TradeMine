@@ -63,6 +63,7 @@ CREATE TABLE sale
 	purchase boolean NOT NULL,
 	stock_symbol VARCHAR(100) NOT NULL,
 	shares INTEGER NOT NULL,
+  price_per_share FLOAT NOT NULL,
 	transaction_date timestamp NOT NULL,
 
   CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES app_user(id),

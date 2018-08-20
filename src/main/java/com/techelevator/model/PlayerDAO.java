@@ -1,6 +1,5 @@
 package com.techelevator.model;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface PlayerDAO {
@@ -15,7 +14,7 @@ public interface PlayerDAO {
 	
 	public List<Player> getInvitesForUser(Long userId);
 	
-	public BigDecimal getPlayerBalanceForGame(Long userId, Long gameId);
+	public Player getPlayerForGame(Long userId, Long gameId);
 	
 	public List<String> getPlayerBalanceForGames(Long userId);
 	

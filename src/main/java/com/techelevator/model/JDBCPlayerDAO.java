@@ -1,6 +1,5 @@
 package com.techelevator.model;
 
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,15 +62,16 @@ public class JDBCPlayerDAO implements PlayerDAO {
 	}
 
 	@Override
-	public BigDecimal getPlayerBalanceForGame(Long userId, Long gameId) {
+	public Player getPlayerForGame(Long userId, Long gameId) {
 		String sqlGetPlayers = "SELECT * "
-				+ "FROM player "
+				+ "FROM player p "
+				+ "INNER JOIN game g ON g.game_id = p.game_id "
 				+ "WHERE user_id = ? "
-				+ "AND game_id = ?";
+				+ "AND p.game_id = ?";
 
 		SqlRowSet player = jdbcTemplate.queryForRowSet(sqlGetPlayers, userId, gameId);
 		if (player.next()) {
-			return player.getBigDecimal("amount_left");
+			return mapRowToPlayer(player, false, true);
 		}
 		return null;
 	}

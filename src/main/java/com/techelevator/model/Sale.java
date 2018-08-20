@@ -1,5 +1,6 @@
 package com.techelevator.model;
 
+import java.text.NumberFormat;
 import java.util.Date;
 
 public class Sale {
@@ -9,6 +10,7 @@ public class Sale {
 	private boolean purchase;
 	private String stockSymbol;
 	private Long shares;
+	private Double pricePerShare;
 	private Date transactionDate;
 	
 	public Long getSaleId() {
@@ -46,6 +48,13 @@ public class Sale {
 	}
 	public void setShares(Long shares) {
 		this.shares = shares;
+	}
+	public String getPricePerShare() {
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		return formatter.format(pricePerShare);
+	}
+	public void setPricePerShare(Double pricePerShare) {
+		this.pricePerShare = pricePerShare;
 	}
 	public Date getTransactionDate() {
 		return transactionDate;

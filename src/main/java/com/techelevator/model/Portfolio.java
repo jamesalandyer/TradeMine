@@ -30,4 +30,8 @@ public class Portfolio {
 	public void setShares(Long shares) {
 		this.shares = shares;
 	}
+	
+	public Double getSharesValue(Double pricePerShare) {
+		return shares * pricePerShare;
+	}
 }

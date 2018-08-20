@@ -1,5 +1,7 @@
 package com.techelevator.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -9,8 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.techelevator.model.Player;
 import com.techelevator.model.PlayerDAO;
 import com.techelevator.model.PortfolioDAO;
+import com.techelevator.model.Sale;
+import com.techelevator.model.SaleDAO;
 import com.techelevator.model.User;
 
 @Controller
@@ -18,11 +23,13 @@ public class PortfolioController {
 	
 	private PortfolioDAO portfolioDAO;
 	private PlayerDAO playerDAO;
+	private SaleDAO saleDAO;
 	
 	@Autowired
-	public PortfolioController(PortfolioDAO portfolioDAO, PlayerDAO playerDAO) {
+	public PortfolioController(PortfolioDAO portfolioDAO, PlayerDAO playerDAO, SaleDAO saleDAO) {
 		this.portfolioDAO = portfolioDAO;
 		this.playerDAO = playerDAO;
+		this.saleDAO = saleDAO;
 	}
 	
 	@RequestMapping(path="/game/{gameId}/{userName}", method=RequestMethod.GET)
@@ -35,7 +42,14 @@ public class PortfolioController {
 			return "redirect:/game/" + gameId;
 		}
 		Long userId = user.getUserId();
+		Player player = playerDAO.getPlayerForGame(userId, gameId);
+		if(!player.isJoined()) {
+			return "redirect:/";
+		}
 		request.setAttribute("playerInvites", playerDAO.getInvitesForUser(userId));
+		request.setAttribute("gamePlayer", player);
+		request.setAttribute("playerPortfolios", portfolioDAO.getPortfoliosForGame(gameId, userId));
+		request.setAttribute("apiKey", "6NAAJT5VBIBTUPFE");
 		
 		return "portfolio";
 	}

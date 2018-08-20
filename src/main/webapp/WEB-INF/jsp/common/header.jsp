@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${pageTitle} | TradeMine</title>
-<script src="/capstone/js/jquery.min.js"></script>
+<script src="/capstone/js/jquery-3.2.1.min.js"></script>
 <script src="/capstone/js/jquery.validate.min.js"></script>
 <script src="/capstone/js/additional-methods.min.js "></script>
 <script src="/capstone/js/moment.min.js"></script>
