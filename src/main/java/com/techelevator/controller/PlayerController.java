@@ -39,7 +39,7 @@ public class PlayerController {
 	}
 	
 	@RequestMapping(path="/invites/send", method=RequestMethod.POST)
-	public String sendInvite(HttpSession session, @RequestParam Long inviteeId, @RequestParam Long gameId, RedirectAttributes redirectAttrs) {
+	public String sendInvite(HttpSession session, @RequestParam Long inviteeId, @RequestParam Long gameId) {
 		User user = (User) session.getAttribute("currentUser");
 		if(user == null) {
 			return "redirect:/login";
@@ -54,8 +54,6 @@ public class PlayerController {
 		newPlayer.setUserId(inviteeId);
 		
 		playerDAO.savePlayer(newPlayer);
-		
-		redirectAttrs.addFlashAttribute("gameId", gameId);
 		
 		return "redirect:/game/" + gameId;
 	}

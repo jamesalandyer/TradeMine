@@ -6,6 +6,8 @@ public interface PlayerDAO {
 
 	public void savePlayer(Player player);
 	
+	public void updatePlayer(Player player);
+	
 	public void acceptInvite(Player invite);
 	
 	public void declineInvite(Player invite);

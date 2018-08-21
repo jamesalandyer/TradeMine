@@ -20,8 +20,9 @@ public class JDBCSaleDAO implements SaleDAO {
 	
 	@Override
 	public void saveSale(Sale sale) {
-		// TODO Auto-generated method stub
-
+		String sqlInsertSale = "INSERT INTO sale(game_id, user_id, purchase, stock_symbol, shares, price_per_share, transaction_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		jdbcTemplate.update(sqlInsertSale,
+				sale.getGameId(), sale.getUserId(), sale.isPurchase(), sale.getStockSymbol(), sale.getShares(), sale.getPricePerShare(), sale.getTransactionDate());
 	}
 
 	@Override

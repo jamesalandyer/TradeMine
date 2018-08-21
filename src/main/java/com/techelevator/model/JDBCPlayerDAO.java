@@ -27,6 +27,13 @@ public class JDBCPlayerDAO implements PlayerDAO {
 		jdbcTemplate.update(sqlInsertPlayer,
 				player.getAmountLeft(), player.getInviterId(), false, player.getUserId(), player.getGameId());
 	}
+	
+	@Override
+	public void updatePlayer(Player player) {
+		String sqlUpdatePlayer = "UPDATE player SET amount_left = ? WHERE game_id = ? AND user_id = ?";
+		jdbcTemplate.update(sqlUpdatePlayer,
+				player.getAmountLeft(), player.getGameId(), player.getUserId());
+	}
 
 	@Override
 	public List<Player> getPlayersForGame(Long gameId) {

@@ -92,9 +92,14 @@
 			class="title"><c:out
 					value="${(currentUser.userName == player.userName) ? 'You' : player.userName}" /></span>
 			<div class="secondary-content right">
-				<h5 class="equal-margin">
+				<h5 id="${player.userId}-money" class="equal-margin">
 					<c:out value="${player.moneyLeft}" />
 				</h5>
+			</div>
+			<div class="playerPortfolio" data-id="${player.userId}" hidden>
+				<c:forEach var="portfolio" items="${playerPortfolios.get(player.userId)}">
+					<span data-stock="${portfolio.stockSymbol}" data-shares="${portfolio.shares}" hidden></span>
+				</c:forEach>
 			</div>
 		</li>
 	</c:forEach>

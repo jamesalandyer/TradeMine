@@ -56,6 +56,21 @@ public class JDBCPortfolioDAO implements PortfolioDAO {
 		return allPlayerPortfolios;
 	}
 	
+	@Override
+	public Portfolio getPortfolio(Long gameId, Long userId, String stockSymbol) {
+		String sqlGetPortfolio = "SELECT * "
+				+ "FROM portfolio "
+				+ "WHERE user_id = ? "
+				+ "AND game_id = ? "
+				+ "AND stock_symbol = ?";
+
+		SqlRowSet portfolio = jdbcTemplate.queryForRowSet(sqlGetPortfolio, userId, gameId, stockSymbol);
+		if (portfolio.next()) {
+			return mapRowToPortfolio(portfolio);
+		}
+		return null;
+	}
+	
 	private Portfolio mapRowToPortfolio(SqlRowSet row) {
 		Portfolio portfolio = new Portfolio();
 		portfolio.setUserId(row.getLong("user_id"));

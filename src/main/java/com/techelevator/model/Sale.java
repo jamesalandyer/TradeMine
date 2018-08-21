@@ -49,12 +49,15 @@ public class Sale {
 	public void setShares(Long shares) {
 		this.shares = shares;
 	}
-	public String getPricePerShare() {
-		NumberFormat formatter = NumberFormat.getCurrencyInstance();
-		return formatter.format(pricePerShare);
+	public Double getPricePerShare() {
+		return pricePerShare;
 	}
 	public void setPricePerShare(Double pricePerShare) {
 		this.pricePerShare = pricePerShare;
+	}
+	public String getPricePerShareFormatted() {
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		return formatter.format(pricePerShare);
 	}
 	public Date getTransactionDate() {
 		return transactionDate;

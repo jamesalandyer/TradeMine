@@ -11,6 +11,7 @@
 <script src="/capstone/js/additional-methods.min.js "></script>
 <script src="/capstone/js/moment.min.js"></script>
 <script src="/capstone/js/materialize.min.js"></script>
+<script src="/capstone/js/main.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
 	rel="stylesheet">
 	<link rel="stylesheet" type="text/css"

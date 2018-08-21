@@ -2,7 +2,9 @@ package com.techelevator.controller;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +21,8 @@ import com.techelevator.model.Game;
 import com.techelevator.model.GameDAO;
 import com.techelevator.model.Player;
 import com.techelevator.model.PlayerDAO;
+import com.techelevator.model.Portfolio;
+import com.techelevator.model.PortfolioDAO;
 import com.techelevator.model.User;
 import com.techelevator.model.UserDAO;
 
@@ -28,12 +32,14 @@ public class HomeController {
 	private GameDAO gameDAO;
 	private PlayerDAO playerDAO;
 	private UserDAO userDAO;
+	private PortfolioDAO portfolioDAO;
 
 	@Autowired
-	public HomeController(GameDAO gameDAO, PlayerDAO playerDAO, UserDAO userDAO) {
+	public HomeController(GameDAO gameDAO, PlayerDAO playerDAO, UserDAO userDAO, PortfolioDAO portfolioDAO) {
 		this.gameDAO = gameDAO;
 		this.playerDAO = playerDAO;
 		this.userDAO = userDAO;
+		this.portfolioDAO = portfolioDAO;
 	}
 	
 	@RequestMapping(path="/", method=RequestMethod.GET)
@@ -72,6 +78,11 @@ public class HomeController {
 		request.setAttribute("users", userDAO.getAllUsers().stream()
 			.filter(u -> allPlayers.stream()
 					.map(player -> player.getUserId()).collect(Collectors.toList()).contains(u.getUserId()) == false).collect(Collectors.toList()));
+		Map<Long, List<Portfolio>> playerPortfolios = new HashMap<>();
+		for (Player player: gamePlayers) {
+			playerPortfolios.put(player.getUserId(), portfolioDAO.getPortfoliosForGame(gameId, player.getUserId()));
+		}
+		request.setAttribute("playerPortfolios", playerPortfolios);
 		
 		return "game";
 	}

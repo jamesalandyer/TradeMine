@@ -12,4 +12,6 @@ public interface PortfolioDAO {
 	
 	public List<Portfolio> getPortfoliosForGame(Long gameId, Long userId);
 	
+	public Portfolio getPortfolio(Long gameId, Long userId, String stockSymbol);
+	
 }

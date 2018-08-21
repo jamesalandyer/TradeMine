@@ -4,104 +4,133 @@
 <%@include file="/WEB-INF/jsp/common/header.jsp"%>
 
 <script type="text/javascript">
-	$(document).ready(function() {
-		var playerPortfolios = $('.portfolio-item');
-		if (playerPortfolios.length > 0) {
-			var stockPrices = playerPortfolios.map(function(index, item) {
-				var portfolio = $(item);
-				var stockSymbol = portfolio.data('symbol');
-				var shares = portfolio.data('shares');
-				getPriceForStock(stockSymbol, shares);
-			});
-		}
-		$('.fixed-action-btn').floatingActionButton();
-		$('.modal').modal();
-		$("#invitePlayer").click(
-				function(event) {
-					var isValid = $("#playersSelect").val();
-					if (isValid) {
-						$("#inviteForm").submit();
+	$(document).ready(
+			function() {
+				var playerPortfolios = $('.portfolio-item');
+				if (playerPortfolios.length > 0) {
+					var stockPrices = playerPortfolios
+							.map(function(index, item) {
+								var portfolio = $(item);
+								var stockSymbol = portfolio.data('symbol');
+								var shares = portfolio.data('shares');
+								getPriceForStock(stockSymbol, shares, function(
+										formattedPriceStr, totalPrice, error) {
+									var replace = $('#' + stockSymbol);
+									if (error) {
+										replace.text(error);
+									} else {
+										addToTotalMoneyString(totalPrice,
+												$('#portfolioTotal'));
+										replace.text(formattedPriceStr);
+									}
+								});
+							});
+				}
+				$('.fixed-action-btn').floatingActionButton();
+				$('.modal').modal({
+					dismissible: true,
+					onCloseEnd: function() {
+						$('#price').val('');
+						var optionsSelect = $('#shares-amount');
+						optionsSelect.html('<option value="" disabled selected>Not Enough Money</option>');
+						optionsSelect.formSelect();
+						var ticker = $('#stockTicker');
+						ticker.val('');
+						ticker.removeAttr('readonly');
+						var submit = $('#submit-purchase');
+						submit.attr('disabled', 'disabled');
+						submit.text('Search');
+						$('#priceValue').attr('hidden', 'hidden');
+						$('#share-select').attr('hidden', 'hidden');
 					}
-		});
-	});
-	
-	var getPriceForStock = function(stockSymbol, shares) {
-		var link = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=' + stockSymbol + '&interval=1min&apikey=${apiKey}';
-		$.ajax({url: link,
-		    method: 'GET',
-		    success: function (data) {
-		    	var replace = $('#' + stockSymbol);
-		    	if(data['Error Message']) {
-		    		replace.text('Unable To Calculate');
-		    	} else if (data['Information']) {
-		    		replace.text('Please Try Again');
-		    	} else {
-		    		var price = data['Time Series (1min)'][data['Meta Data']['3. Last Refreshed']]['4. close'];
-		    		var totalPrice = price * shares
-		    		addToTotalMoneyString(totalPrice);
-		    		replace.text(convertToMoneyString(totalPrice));
-		    	}
-		    }
-		});
-	};
-	
-	var numberWithCommas = function(x) {
-		  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-	}
-	
-	var convertToMoneyString = function(str) {
-		return '$' + numberWithCommas(Math.round(Number(str) * 100) / 100);
-	};
-	
-	var addToTotalMoneyString = function(amount) {
-		var portfolioTotal = $('#portfolioTotal');
-		var currentTotal = Number(portfolioTotal.text().replace('$','').replace(',',''));
-		var newTotal = currentTotal + amount;
-		return portfolioTotal.text(convertToMoneyString(newTotal));
-	};
+				});
+				$('select').formSelect();
+				$('#stockTicker').on('change paste keyup', function(event) {
+					if (event.target.value.length > 0) {
+						$('#submit-purchase').removeAttr('disabled');
+					} else {
+						$('#submit-purchase').attr('disabled', 'disabled');
+					}
+				});
+				$('#submit-purchase').click(function(event) {
+					var submit = $(event.target);
+					if (submit.text() === 'Search') {
+						var ticker = $('#stockTicker');
+						var stockSymbol = ticker.val();
+						if (stockSymbol !== '') {
+							ticker.attr('readonly', 'readonly');
+							submit.attr('disabled', 'disabled');
+							submit.text('Purchase');
+							findStockPrice(stockSymbol, function(price, error) {
+								var amountLeft = ${gamePlayer.amountLeft};
+								var availableOptions = Math.floor(Number(amountLeft) / Number(price));
+								if (availableOptions > 0) {
+									var priceLabel = $('#price');
+									priceLabel.val(Number(price));
+									$('#priceValue').removeAttr('hidden');
+									var optionsSelect = $('#shares-amount');
+									var optionsStr = '';
+									for (var i = 1; i <= availableOptions; i++) {
+										var selected = (i == 1);
+										optionsStr += '<option value="' + i + '"' + (selected ? ' selected ' : '') + '>' + i + ' Share' + ((i > 1) ? 's' : '') + '</option>';
+									}
+									optionsSelect.html(optionsStr);
+									optionsSelect.formSelect();
+									submit.removeAttr('disabled');
+								}
+								$('#share-select').removeAttr('hidden');
+							});
+						}
+					} else {
+						$('#purchaseForm').submit();
+					}
+				});
+			});
 </script>
-<div id="inviteUser" class="modal modal-fixed-footer">
+<div id="buyStock" class="modal modal-fixed-footer">
 	<div class="modal-content">
 		<div class="row">
 			<div class="col s12">
-				<h4 class="grey-text text-darken-3">Invite Player</h4>
+				<h4 class="grey-text text-darken-3">Buy A Stock</h4>
 				<hr />
 			</div>
 		</div>
 		<div class="row">
-			<div class="col s12">The game is more fun when you invite other
-				players. Use the dropdown below to view players you can invite to
-				your game!</div>
+			<div class="col s12">Add to your portfolio by purchasing a
+				stock! Search for a stock and purchase as many as you can afford. Be
+				careful on what you choose as the game depends on it!</div>
 		</div>
 		<br />
 		<div class="row">
-			<c:url var="formAction" value="/invites/send" />
-			<form method="POST" action="${formAction}" id="inviteForm">
+			<c:url var="formAction" value="purchase" />
+			<form method="POST" action="${formAction}" id="purchaseForm">
 				<input type="hidden" name="CSRF_TOKEN" value="${CSRF_TOKEN}" />
-				<input type="hidden" name="gameId" value="${game.gameId}" />
+				<input type="hidden" name="amountLeft" value="${gamePlayer.amountLeft}" />
 				<div class="input-field col s12">
-					<select id="playersSelect" name="inviteeId">
-					<c:choose>
-					<c:when test="${users.size() > 0}">
-						<c:forEach var="user" items="${users}">
-							<option value="${user.userId}"><c:out
-									value="${user.userName}" /></option>
-						</c:forEach>
-						</c:when>
-						<c:otherwise>
-						<option value="" disabled selected>No Players Available</option>
-						</c:otherwise>
-						</c:choose>
-					</select> <label>Player</label>
+					<input id="stockTicker" name="stockTicker" type="text" maxlength="5"
+						style="text-transform: uppercase"> <label for="stockTicker">Stock
+						Ticker</label>
+				</div>
+				<div class="input-field col s12" id="priceValue" hidden>
+				<label>Per Share</label>
+						<input id="price" name="price" placeholder="Per Share" type="text" readonly>
+				</div>
+				<div id="share-select" class="col s12" hidden>
+				<label>Choose Amount</label>
+					<select id="shares-amount" name="shares" class="browser-default">
+						<option value="" disabled selected>Not Enough Money</option>
+					</select>
 				</div>
 			</form>
 		</div>
 	</div>
 	<div class="modal-footer">
-		<a href="#!" class="modal-close waves-effect waves-teal btn-flat">Cancel</a>
-		&nbsp; <a id="invitePlayer" class="waves-effect waves-teal btn">Invite</a>
+		<a href="#!" class="modal-close waves-effect waves-teal btn-flat"
+			id="cancel-purchase">Cancel</a> &nbsp; <a id="submit-purchase"
+			class="waves-effect waves-teal btn" disabled>Search</a>
 	</div>
 </div>
+
 <div class="row">
 	<div class="col s12 m8 grey-text text-darken-3">
 		<h2>
@@ -123,22 +152,24 @@
 <ul class="collection">
 	<c:forEach var="playerPortfolio" items="${playerPortfolios}">
 		<li
-			class="collection-item avatar grey lighten-5 grey-text text-darken-2 portfolio-item" data-symbol="${playerPortfolio.stockSymbol}"
-				data-shares="${playerPortfolio.shares}">
-			<i class="material-icons circle teal">insert_chart</i> <span
-			class="title"><c:out
-					value="${playerPortfolio.stockSymbol}" /></span><br />
-			<p><c:out value="${playerPortfolio.shares}" /><c:out value="${playerPortfolio.shares > 1 ? ' Shares': 'Share'}" /></p>
+			class="collection-item avatar grey lighten-5 grey-text text-darken-2 portfolio-item"
+			data-symbol="${playerPortfolio.stockSymbol}"
+			data-shares="${playerPortfolio.shares}"><i
+			class="material-icons circle teal">insert_chart</i> <span
+			class="title"><c:out value="${playerPortfolio.stockSymbol}" /></span><br />
+			<p>
+				<c:out value="${playerPortfolio.shares}" />
+				<c:out value="${playerPortfolio.shares > 1 ? ' Shares': 'Share'}" />
+			</p>
 			<div class="secondary-content right">
 				<h5 id="${playerPortfolio.stockSymbol}" class="equal-margin">Loading...</h5>
-			</div>
-		</li>
+			</div></li>
 	</c:forEach>
 </ul>
 <div class="fixed-action-btn">
 	<a
 		class="waves-effect waves-light btn-floating btn-large teal btn modal-trigger"
-		href="#inviteUser"> <i class="large material-icons">add</i>
+		href="#buyStock"> <i class="large material-icons">add</i>
 	</a>
 </div>
 
