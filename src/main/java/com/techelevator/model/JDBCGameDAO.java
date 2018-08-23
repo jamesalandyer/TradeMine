@@ -31,7 +31,7 @@ public class JDBCGameDAO implements GameDAO {
 	@Override
 	public void saveGame(Game game) {
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		String insertStatement = "INSERT INTO game(game_name, creator_id, end_date) VALUES (?, ?, ?)";
+		String insertStatement = "INSERT INTO game(game_name, creator_id, end_date, ended) VALUES (?, ?, ?, false)";
 		jdbcTemplate.update(new PreparedStatementCreator() {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -46,6 +46,12 @@ public class JDBCGameDAO implements GameDAO {
 	}
 
 	@Override
+	public void updateGame(Game game) {
+		String sqlUpdateGame = "UPDATE game SET ended = ? WHERE game_id = ?";
+		jdbcTemplate.update(sqlUpdateGame, game.isEnded(), game.getGameId());
+	}
+	
+	@Override
 	public Game getGame(Long gameId) {
 		String sqlGetGame = "SELECT * " + "FROM game " + "WHERE game_id = ? ";
 
@@ -58,10 +64,10 @@ public class JDBCGameDAO implements GameDAO {
 
 	@Override
 	public List<Game> getGamesWithUser(Long userId) {
-		String sqlGetGames = "SELECT g.game_id, g.game_name, g.creator_id, g.end_date, count(p.user_id) AS player_count "
+		String sqlGetGames = "SELECT g.game_id, g.game_name, g.creator_id, g.end_date, g.ended, count(p.user_id) AS player_count "
 				+ "FROM game g "
 				+ "INNER JOIN player p ON g.game_id = p.game_id "
-				+ "WHERE p.user_id = ? "
+				+ "WHERE g.game_id IN (select pl.game_id FROM player pl WHERE pl.user_id = ? AND pl.joined IS TRUE) "
 				+ "AND p.joined IS TRUE "
 				+ "GROUP BY g.game_id "
 				+ "ORDER BY g.game_id DESC";
@@ -80,6 +86,7 @@ public class JDBCGameDAO implements GameDAO {
 		game.setGameName(row.getString("game_name"));
 		game.setCreatorId(row.getLong("creator_id"));
 		game.setEndDate(row.getString("end_date"));
+		game.setEnded(row.getBoolean("ended"));
 		if (addPlayers) {
 			game.setPlayerCount(row.getInt("player_count"));
 		}

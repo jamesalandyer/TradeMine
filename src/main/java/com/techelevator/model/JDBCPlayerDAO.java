@@ -88,7 +88,7 @@ public class JDBCPlayerDAO implements PlayerDAO {
 		String sqlGetPlayers = "SELECT * "
 				+ "FROM player "
 				+ "WHERE user_id = ? "
-				+ "ORDER BY game_id";
+				+ "ORDER BY game_id DESC";
 
 		SqlRowSet gameBalances = jdbcTemplate.queryForRowSet(sqlGetPlayers, userId);
 		List<String> allGameBalances = new ArrayList<>();

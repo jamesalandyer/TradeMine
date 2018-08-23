@@ -18,6 +18,15 @@
 		type="hidden" name="gameId" id="gameId" value="" /> <input type="hidden"
 		name="accept" id="confirmValue" value="" />
 </form>
+<div class="row">
+	<div class="col s12 m8 grey-text text-darken-3">
+		<h3>
+			INVITES FOR GAMES
+		</h3>
+		<hr />
+		<br />
+	</div>
+</div>
 <c:choose>
 	<c:when test="${playerInvites.size() > 0}">
 		<ul class="collection">

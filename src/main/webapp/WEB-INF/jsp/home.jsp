@@ -22,6 +22,15 @@
 						});
 			});
 </script>
+<div class="row">
+	<div class="col s12 m8 grey-text text-darken-3">
+		<h3>
+			YOUR GAMES
+		</h3>
+		<hr />
+		<br />
+	</div>
+</div>
 <div id="addGame" class="modal modal-fixed-footer">
 	<div class="modal-content">
 		<div class="row">

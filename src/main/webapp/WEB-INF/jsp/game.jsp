@@ -5,18 +5,66 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		$('.fixed-action-btn').floatingActionButton();
-		$('.modal').modal();
-		$('select').formSelect();
-		$("#invitePlayer").click(
-				function(event) {
-					var isValid = $("#playersSelect").val();
-					if (isValid) {
-						$("#inviteForm").submit();
-					}
-		});
+		var gameEndedDate = '2018-08-20';
+		if (${gameEnded && !soldAll}) {
+			var playerSellData = $('#sell-data');
+			var playerPortfolio = $('.playerPortfolio');
+			var totalItems = $('.data-holder').length;
+			var returnedItems = 0;
+			playerPortfolio.each(function(index, element) {
+				var el = $(element);
+				el.children('span').each(function(index, element) {
+					var stockData = $(element);
+					var stockTickerData = stockData.data('stock');
+					findStockPrice(stockTickerData, function(price, error) {
+						if(!error) {
+							console.log(totalItems);
+							returnedItems += 1;
+							console.log(returnedItems);
+							playerSellData.val(playerSellData.val() + stockTickerData + ':' + price + '/');
+							if (totalItems === returnedItems) {
+								console.log(playerSellData.val());
+								$('#endedForm').submit();
+							}
+						}
+					}, gameEndedDate);
+				});
+			});
+		} else if (${!gameEnded}) {
+			$('.fixed-action-btn').floatingActionButton();
+			$('.modal').modal();
+			$('select').formSelect();
+			$("#invitePlayer").click(
+					function(event) {
+						var isValid = $("#playersSelect").val();
+						if (isValid) {
+							$("#inviteForm").submit();
+						}
+			});
+			var allMoney = $('#all-money');
+			$('.playerPortfolio').each(function(index, element) {
+				var el = $(element);
+				var userId = el.data('id');
+				var totalValue = 0;
+				el.children('span').each(function(index, element) {
+					var stockData = $(element);
+					var stockTickerData = stockData.data('stock');
+					var sharesData = stockData.data('shares');
+					var currentValue;
+					findStockPrice(stockTickerData, function(price, error) {
+						if(!error) {
+							currentValue = price;
+						}
+					});
+					totalValue += currentValue * Number(sharesData);
+				});
+				addToTotalMoneyString(totalValue, $('#' + userId + '-money'));
+				addToTotalMoneyString(totalValue, allMoney);
+			});
+		}
 	});
 </script>
+<c:if test="${!gameEnded}">
 <div id="inviteUser" class="modal modal-fixed-footer">
 	<div class="modal-content">
 		<div class="row">
@@ -32,8 +80,8 @@
 		</div>
 		<br />
 		<div class="row">
-			<c:url var="formAction" value="/invites/send" />
-			<form method="POST" action="${formAction}" id="inviteForm">
+			<c:url var="formActionSend" value="/invites/send" />
+			<form method="POST" action="${formActionSend}" id="inviteForm">
 				<input type="hidden" name="CSRF_TOKEN" value="${CSRF_TOKEN}" />
 				<input type="hidden" name="gameId" value="${game.gameId}" />
 				<div class="input-field col s12">
@@ -59,15 +107,22 @@
 		&nbsp; <a id="invitePlayer" class="waves-effect waves-teal btn">Invite</a>
 	</div>
 </div>
+<div class="fixed-action-btn">
+	<a
+		class="waves-effect waves-light btn-floating btn-large teal btn modal-trigger"
+		href="#inviteUser"> <i class="large material-icons">person_add</i>
+	</a>
+</div>
+</c:if>
 <div class="row">
 	<div class="col s12 m8 grey-text text-darken-3">
-		<h2>
+		<h3>
 			<c:out value="${game.gameName.toUpperCase()}" />
-		</h2>
+		</h3>
 		<hr />
 		<h5>
 			<i class="material-icons circle grey darken-3 small white-text left">pie_chart_outlined</i>
-			<c:out value="${total}" />
+			<span id="all-money"><c:out value="${total}" /></span>
 		</h5>
 		<h5>
 			<i class="material-icons circle grey darken-3 small white-text left">group</i>
@@ -98,17 +153,21 @@
 			</div>
 			<div class="playerPortfolio" data-id="${player.userId}" hidden>
 				<c:forEach var="portfolio" items="${playerPortfolios.get(player.userId)}">
-					<span data-stock="${portfolio.stockSymbol}" data-shares="${portfolio.shares}" hidden></span>
+					<span class="data-holder" data-stock="${portfolio.stockSymbol}" data-shares="${portfolio.shares}" hidden></span>
 				</c:forEach>
 			</div>
 		</li>
 	</c:forEach>
 </ul>
-<div class="fixed-action-btn">
-	<a
-		class="waves-effect waves-light btn-floating btn-large teal btn modal-trigger"
-		href="#inviteUser"> <i class="large material-icons">person_add</i>
-	</a>
-</div>
+<c:if test="${gameEnded && !soldAll}">
+<div hidden>
+	<c:url var="formActionEnded" value="/game/${game.gameId}/ended" />
+			<form method="POST" action="${formActionEnded}" id="endedForm">
+				<input type="hidden" name="CSRF_TOKEN" value="${CSRF_TOKEN}" />
+				<input type="hidden" name="gameId" value="${game.gameId}" />
+				<input type="hidden" id="sell-data" name="sellData" value="" />
+			</form>
+			</div>
+</c:if>
 
 <c:import url="/WEB-INF/jsp/common/footer.jsp" />

@@ -56,6 +56,27 @@ public class PortfolioController {
 		return "portfolio";
 	}
 	
+	@RequestMapping(path="/game/{gameId}/{userName}/trades", method=RequestMethod.GET)
+	public String displayTrades(HttpServletRequest request, HttpSession session, @PathVariable Long gameId, @PathVariable String userName) {
+		User user = (User) session.getAttribute("currentUser");
+		if(user == null) {
+			return "redirect:/login";
+		}
+		if(!(user.getUserName().equals(userName))) {
+			return "redirect:/game/" + gameId;
+		}
+		Long userId = user.getUserId();
+		Player player = playerDAO.getPlayerForGame(userId, gameId);
+		if(!player.isJoined()) {
+			return "redirect:/";
+		}
+		request.setAttribute("playerInvites", playerDAO.getInvitesForUser(userId));
+		request.setAttribute("gameName", player.getGameName());
+		request.setAttribute("trades", saleDAO.getSalesByGameAndPlayer(gameId, userId));
+		
+		return "trades";
+	}
+	
 	@RequestMapping(path="/game/{gameId}/purchase", method=RequestMethod.POST)
 	public String purchaseStock(HttpSession session, @PathVariable Long gameId, @RequestParam Long shares, @RequestParam String stockTicker, @RequestParam Double price, @RequestParam Double amountLeft) {
 		User user = (User) session.getAttribute("currentUser");
@@ -68,7 +89,7 @@ public class PortfolioController {
 		newSale.setPricePerShare(price);
 		newSale.setPurchase(true);
 		newSale.setShares(shares);
-		newSale.setStockSymbol(stockTicker);
+		newSale.setStockSymbol(stockTicker.toUpperCase());
 		newSale.setTransactionDate(new Date());
 		newSale.setUserId(user.getUserId());
 		saleDAO.saveSale(newSale);
@@ -89,6 +110,40 @@ public class PortfolioController {
 			newPortfolio.setStockSymbol(stockTicker);
 			newPortfolio.setUserId(user.getUserId());
 			portfolioDAO.savePortfolio(newPortfolio);
+		}
+		
+		
+		return "redirect:/game/" + gameId + "/" + user.getUserName();
+	}
+	
+	@RequestMapping(path="/game/{gameId}/sell", method=RequestMethod.POST)
+	public String sellStock(HttpSession session, @PathVariable Long gameId, @RequestParam Long shares, @RequestParam String stockTicker, @RequestParam Double price, @RequestParam Double amountLeft) {
+		User user = (User) session.getAttribute("currentUser");
+		if(user == null) {
+			return "redirect:/login";
+		}
+		
+		Sale newSale = new Sale();
+		newSale.setGameId(gameId);
+		newSale.setPricePerShare(price);
+		newSale.setPurchase(false);
+		newSale.setShares(shares);
+		newSale.setStockSymbol(stockTicker.toUpperCase());
+		newSale.setTransactionDate(new Date());
+		newSale.setUserId(user.getUserId());
+		saleDAO.saveSale(newSale);
+		Player updatePlayer = new Player();
+		updatePlayer.setAmountLeft(new BigDecimal(amountLeft).add((new BigDecimal(shares).multiply(new BigDecimal(price)))));
+		updatePlayer.setGameId(gameId);
+		updatePlayer.setUserId(user.getUserId());
+		playerDAO.updatePlayer(updatePlayer);
+		
+		Portfolio currentPortfolio = portfolioDAO.getPortfolio(gameId, user.getUserId(), stockTicker);
+		if (currentPortfolio.getShares() == shares) {
+			portfolioDAO.removePortfolio(currentPortfolio);
+		} else {
+			currentPortfolio.setShares(currentPortfolio.getShares() - shares);
+			portfolioDAO.updatePortfolio(currentPortfolio);
 		}
 		
 		

@@ -5,6 +5,7 @@ public class Game {
 	private String gameName;
 	private Long creatorId;
 	private String endDate;
+	private boolean ended;
 	private int playerCount;
 	
 	public Long getGameId() {
@@ -30,6 +31,12 @@ public class Game {
 	}
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
+	}
+	public boolean isEnded() {
+		return ended;
+	}
+	public void setEnded(boolean ended) {
+		this.ended = ended;
 	}
 	public int getPlayerCount() {
 		return playerCount;

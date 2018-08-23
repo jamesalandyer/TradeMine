@@ -25,6 +25,7 @@ CREATE TABLE game
 	game_name VARCHAR(200) NOT NULL,
   creator_id INTEGER NOT NULL,
 	end_date VARCHAR(100) NOT NULL,
+  ended boolean NOT NULL,
 
   CONSTRAINT fk_creator_id FOREIGN KEY (creator_id) REFERENCES app_user(id)
 );

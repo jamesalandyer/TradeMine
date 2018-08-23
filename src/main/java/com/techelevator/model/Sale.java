@@ -65,4 +65,8 @@ public class Sale {
 	public void setTransactionDate(Date transactionDate) {
 		this.transactionDate = transactionDate;
 	}
+	public String getTotalPriceFormatted() {
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		return formatter.format(pricePerShare * shares);
+	}
 }

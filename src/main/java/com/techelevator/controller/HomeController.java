@@ -2,6 +2,9 @@ package com.techelevator.controller;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,8 @@ import com.techelevator.model.Player;
 import com.techelevator.model.PlayerDAO;
 import com.techelevator.model.Portfolio;
 import com.techelevator.model.PortfolioDAO;
+import com.techelevator.model.Sale;
+import com.techelevator.model.SaleDAO;
 import com.techelevator.model.User;
 import com.techelevator.model.UserDAO;
 
@@ -33,13 +38,15 @@ public class HomeController {
 	private PlayerDAO playerDAO;
 	private UserDAO userDAO;
 	private PortfolioDAO portfolioDAO;
+	private SaleDAO saleDAO;
 
 	@Autowired
-	public HomeController(GameDAO gameDAO, PlayerDAO playerDAO, UserDAO userDAO, PortfolioDAO portfolioDAO) {
+	public HomeController(GameDAO gameDAO, PlayerDAO playerDAO, UserDAO userDAO, PortfolioDAO portfolioDAO, SaleDAO saleDAO) {
 		this.gameDAO = gameDAO;
 		this.playerDAO = playerDAO;
 		this.userDAO = userDAO;
 		this.portfolioDAO = portfolioDAO;
+		this.saleDAO = saleDAO;
 	}
 	
 	@RequestMapping(path="/", method=RequestMethod.GET)
@@ -67,8 +74,10 @@ public class HomeController {
 		if(!playerDAO.getPlayerForGame(userId, gameId).isJoined()) {
 			return "redirect:/";
 		}
+		
 		request.setAttribute("playerInvites", playerDAO.getInvitesForUser(userId));
-		request.setAttribute("game", gameDAO.getGame(gameId));
+		Game currentGame = gameDAO.getGame(gameId);
+		request.setAttribute("game", currentGame);
 		List<Player> allPlayers = playerDAO.getPlayersForGame(gameId);
 		List<Player> gamePlayers = allPlayers.stream().filter(player -> player.isJoined()).collect(Collectors.toList());
 		request.setAttribute("players", gamePlayers);
@@ -83,8 +92,87 @@ public class HomeController {
 			playerPortfolios.put(player.getUserId(), portfolioDAO.getPortfoliosForGame(gameId, player.getUserId()));
 		}
 		request.setAttribute("playerPortfolios", playerPortfolios);
+		request.setAttribute("soldAll", currentGame.isEnded());
+		if (!currentGame.isEnded()) {
+			SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
+			try {
+				Date gameEndDate = format.parse(currentGame.getEndDate());
+				request.setAttribute("gameEnded", (gameEndDate.before(new Date())));
+				SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+				request.setAttribute("gameEndedDate", formatDate.format(gameEndDate).toString());
+			} catch (ParseException e) {
+				request.setAttribute("gameEnded", false);
+				request.setAttribute("gameEndedDate", "");
+				e.printStackTrace();
+			}
+		} else {
+			request.setAttribute("gameEnded", true);
+			request.setAttribute("gameEndedDate", "");
+		}
 		
 		return "game";
+	}
+	
+	@RequestMapping(path="/game/{gameId}/ended", method=RequestMethod.POST)
+	public String displayGameEnded(HttpServletRequest request, HttpSession session, @PathVariable Long gameId, String sellData) {
+		Object user = session.getAttribute("currentUser");
+		if(user == null) {
+			return "redirect:/login";
+		}
+		
+		Long userId = ((User) user).getUserId();
+		if(!playerDAO.getPlayerForGame(userId, gameId).isJoined()) {
+			return "redirect:/";
+		}
+		
+		Game currentGame = gameDAO.getGame(gameId);
+		SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
+		Date today = new Date();
+		Date gameEndDate = today;
+		try {
+			gameEndDate = format.parse(currentGame.getEndDate());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		if (currentGame.isEnded() || !gameEndDate.before(today)) {
+			return "redirect:/game/" + gameId;
+		}
+		
+		Map<String, Double> stocks = new HashMap<>();
+		String[] stocksData = sellData.split("/");
+		for (int i = 0; i < stocksData.length; i++) {
+			String[] stockData = stocksData[i].split(":");
+			stocks.put(stockData[0], Double.parseDouble(stockData[1]));
+		}
+		
+		List<Player> allPlayers = playerDAO.getPlayersForGame(gameId);
+		List<Player> gamePlayers = allPlayers.stream().filter(player -> player.isJoined()).collect(Collectors.toList());
+		for (Player player: gamePlayers) {
+			List<Portfolio> portfolios = portfolioDAO.getPortfoliosForGame(gameId, player.getUserId());
+			BigDecimal totalSales = BigDecimal.ZERO;
+			for (Portfolio portfolio: portfolios) {
+				Sale newSale = new Sale();
+				newSale.setGameId(gameId);
+				newSale.setPurchase(false);
+				newSale.setShares(portfolio.getShares());
+				newSale.setStockSymbol(portfolio.getStockSymbol());
+				newSale.setUserId(portfolio.getUserId());
+				newSale.setTransactionDate(today);
+				Double pricePerShare = stocks.get(portfolio.getStockSymbol());
+				newSale.setPricePerShare(pricePerShare);
+				totalSales = totalSales.add(new BigDecimal(pricePerShare).multiply(new BigDecimal(portfolio.getShares())));
+				saleDAO.saveSale(newSale);
+				portfolio.setShares(0L);
+				portfolioDAO.updatePortfolio(portfolio);
+			}
+			player.setAmountLeft(player.getAmountLeft().add(totalSales));
+			playerDAO.updatePlayer(player);
+		}
+		
+		currentGame.setEnded(true);
+		gameDAO.updateGame(currentGame);
+		
+		return "redirect:/game/" + gameId;
 	}
 	
 	@RequestMapping(path="/game/create", method=RequestMethod.POST)
