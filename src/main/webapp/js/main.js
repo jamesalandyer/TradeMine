@@ -3,7 +3,6 @@ var getStockPrice = function(stockSymbol, callback, date) {
 	var password = '3505ed3bb5704616b56b8435623af23c';
 	var link = 'https://api.intrinio.com/prices?identifier='
 		+ stockSymbol + ((date) ? ('&start_date=' + date + '&end_date=' + date) : '') + '&frequency=daily&page_number=1&page_size=1';
-	console.log(link)
 	$.ajax({
 		url : link,
 		method : 'GET',
@@ -28,20 +27,15 @@ var findStockPrice = function(stockSymbol, callback, date) {
 	var foundStock = localStorage.getItem(stockSymbol);
 	var adjustedDate;
 	if (date) {
-		console.log(date);
 		adjustedDate = date;
-		console.log(adjustedDate);
 		if (adjustedDate.weekday === 0) {
 			adjustedDate = adjustedDate.subtract(2, 'days');
-			console.log(adjustedDate);
 		} else if (adjustedDate.weekday === 6) {
 			adjustedDate = adjustedDate.subtract(1, 'days');
-			console.log(adjustedDate);
 		}
 	}
 	if (foundStock) {
 		var today = moment().format('YYYY-MM-DD');
-		console.log(adjustedDate);
 		if (!adjustedDate) {
 			if (moment().weekday() === 0) {
 				adjustedDate = today.subtract(2, 'days');
@@ -49,11 +43,9 @@ var findStockPrice = function(stockSymbol, callback, date) {
 				adjustedDate = today.subtract(1, 'days');
 			}
 		}
-		console.log(adjustedDate);
 		if (adjustedDate) {
 			adjustedDate = adjustedDate.format('YYYY-MM-DD');
 		}
-		console.log(adjustedDate);
 		if ((moment(today).isAfter(foundStock.split(':')[0]) && adjustedDate !== foundStock.split(':')[0]) || (adjustedDate && adjustedDate !== foundStock.split(':')[0])) {
 			getStockPrice(stockSymbol, callback, adjustedDate);
 		} else {

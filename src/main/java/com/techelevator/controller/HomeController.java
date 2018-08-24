@@ -97,12 +97,9 @@ public class HomeController {
 			SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 			try {
 				Date gameEndDate = format.parse(currentGame.getEndDate());
-				System.out.println(gameEndDate);
 				request.setAttribute("gameEnded", (gameEndDate.before(new Date())));
-				
 				SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
-				System.out.println(formatDate.format(gameEndDate).toString());
-				request.setAttribute("gameEndedDate", formatDate.format(gameEndDate).toString());
+				request.setAttribute("gameEndedDate", formatDate.format(gameEndDate));
 			} catch (ParseException e) {
 				request.setAttribute("gameEnded", false);
 				request.setAttribute("gameEndedDate", "invalid");
@@ -132,8 +129,11 @@ public class HomeController {
 		SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 		Date today = new Date();
 		Date gameEndDate = today;
+		Date endDateFormatted = today;
 		try {
 			gameEndDate = format.parse(currentGame.getEndDate());
+			SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+			endDateFormatted = formatDate.parse(formatDate.format(gameEndDate));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -162,7 +162,7 @@ public class HomeController {
 				newSale.setShares(portfolio.getShares());
 				newSale.setStockSymbol(portfolio.getStockSymbol());
 				newSale.setUserId(portfolio.getUserId());
-				newSale.setTransactionDate(today);
+				newSale.setTransactionDate(endDateFormatted);
 				Double pricePerShare = stocks.get(portfolio.getStockSymbol());
 				newSale.setPricePerShare(pricePerShare);
 				totalSales = totalSales.add(new BigDecimal(pricePerShare).multiply(new BigDecimal(portfolio.getShares())));

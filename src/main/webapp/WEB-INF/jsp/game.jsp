@@ -5,12 +5,9 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		console.log('${gameEndedDate}');
 		var gameEndedDateFormatted = ('${gameEndedDate}' === 'invalid') ? null : '${gameEndedDate}';
-		console.log(gameEndedDateFormatted instanceof Date);
 		if (gameEndedDateFormatted) {
 			gameEndedDateFormatted = moment(gameEndedDateFormatted);
-			
 		}
 		if (${gameEnded && !soldAll}) {
 			var playerSellData = $('#sell-data');
@@ -19,18 +16,14 @@
 			var returnedItems = 0;
 			playerPortfolio.each(function(index, element) {
 				var el = $(element);
-				console.log(gameEndedDateFormatted);
 				el.children('span').each(function(index, element) {
 					var stockData = $(element);
 					var stockTickerData = stockData.data('stock');
 					findStockPrice(stockTickerData, function(price, error) {
 						if(!error) {
-							console.log(totalItems);
 							returnedItems += 1;
-							console.log(returnedItems);
 							playerSellData.val(playerSellData.val() + stockTickerData + ':' + price + '/');
 							if (totalItems === returnedItems) {
-								console.log(playerSellData.val());
 								$('#endedForm').submit();
 							}
 						}
@@ -53,20 +46,24 @@
 				var el = $(element);
 				var userId = el.data('id');
 				var totalValue = 0;
-				el.children('span').each(function(index, element) {
+				var elChildren = el.children('span');
+				var returnedPrices = 0;
+				elChildren.each(function(index, element) {
 					var stockData = $(element);
 					var stockTickerData = stockData.data('stock');
 					var sharesData = stockData.data('shares');
-					var currentValue;
 					findStockPrice(stockTickerData, function(price, error) {
 						if(!error) {
-							currentValue = price;
+							returnedPrices += 1
+							totalValue += price * Number(sharesData);
+							if (returnedPrices === elChildren.length) {
+								addToTotalMoneyString(totalValue, $('#' + userId + '-money'));
+								addToTotalMoneyString(totalValue, allMoney);
+							}
 						}
 					});
-					totalValue += currentValue * Number(sharesData);
 				});
-				addToTotalMoneyString(totalValue, $('#' + userId + '-money'));
-				addToTotalMoneyString(totalValue, allMoney);
+				
 			});
 		}
 	});
