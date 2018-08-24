@@ -1,6 +1,9 @@
 package com.techelevator.controller;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -10,8 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.techelevator.model.Game;
+import com.techelevator.model.GameDAO;
 import com.techelevator.model.Player;
 import com.techelevator.model.PlayerDAO;
 import com.techelevator.model.User;
@@ -20,10 +24,12 @@ import com.techelevator.model.User;
 public class PlayerController {
 
 	private PlayerDAO playerDAO;
+	private GameDAO gameDAO;
 	
 	@Autowired
-	public PlayerController(PlayerDAO playerDAO) {
+	public PlayerController(PlayerDAO playerDAO, GameDAO gameDAO) {
 		this.playerDAO = playerDAO;
+		this.gameDAO = gameDAO;
 	}
 	
 	@RequestMapping(path="/invites", method=RequestMethod.GET)
@@ -43,6 +49,21 @@ public class PlayerController {
 		User user = (User) session.getAttribute("currentUser");
 		if(user == null) {
 			return "redirect:/login";
+		}
+		
+		Game game = gameDAO.getGame(gameId);
+		if (!game.isEnded()) {
+			SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
+			try {
+				Date gameEndDate = format.parse(game.getEndDate());
+				if (gameEndDate.before(new Date())) {
+					return "redirect:/game/" + gameId;
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		} else {
+			return "redirect:/game/" + gameId;
 		}
 		
 		Player newPlayer = new Player();
@@ -69,6 +90,23 @@ public class PlayerController {
 		
 		player.setGameId(gameId);
 		player.setUserId(user.getUserId());
+		
+		Game game = gameDAO.getGame(gameId);
+		if (!game.isEnded()) {
+			SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
+			try {
+				Date gameEndDate = format.parse(game.getEndDate());
+				if (gameEndDate.before(new Date())) {
+					playerDAO.declineInvite(player);
+					return "redirect:/invites";
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		} else {
+			playerDAO.declineInvite(player);
+			return "redirect:/invites";
+		}
 		
 		if (accept.equals("true")) {
 			playerDAO.acceptInvite(player);

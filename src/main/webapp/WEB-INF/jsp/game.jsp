@@ -5,7 +5,13 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		var gameEndedDate = '2018-08-20';
+		console.log('${gameEndedDate}');
+		var gameEndedDateFormatted = ('${gameEndedDate}' === 'invalid') ? null : '${gameEndedDate}';
+		console.log(gameEndedDateFormatted instanceof Date);
+		if (gameEndedDateFormatted) {
+			gameEndedDateFormatted = moment(gameEndedDateFormatted);
+			
+		}
 		if (${gameEnded && !soldAll}) {
 			var playerSellData = $('#sell-data');
 			var playerPortfolio = $('.playerPortfolio');
@@ -13,6 +19,7 @@
 			var returnedItems = 0;
 			playerPortfolio.each(function(index, element) {
 				var el = $(element);
+				console.log(gameEndedDateFormatted);
 				el.children('span').each(function(index, element) {
 					var stockData = $(element);
 					var stockTickerData = stockData.data('stock');
@@ -27,7 +34,7 @@
 								$('#endedForm').submit();
 							}
 						}
-					}, gameEndedDate);
+					}, gameEndedDateFormatted);
 				});
 			});
 		} else if (${!gameEnded}) {

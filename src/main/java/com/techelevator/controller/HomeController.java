@@ -97,17 +97,20 @@ public class HomeController {
 			SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 			try {
 				Date gameEndDate = format.parse(currentGame.getEndDate());
+				System.out.println(gameEndDate);
 				request.setAttribute("gameEnded", (gameEndDate.before(new Date())));
+				
 				SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+				System.out.println(formatDate.format(gameEndDate).toString());
 				request.setAttribute("gameEndedDate", formatDate.format(gameEndDate).toString());
 			} catch (ParseException e) {
 				request.setAttribute("gameEnded", false);
-				request.setAttribute("gameEndedDate", "");
+				request.setAttribute("gameEndedDate", "invalid");
 				e.printStackTrace();
 			}
 		} else {
 			request.setAttribute("gameEnded", true);
-			request.setAttribute("gameEndedDate", "");
+			request.setAttribute("gameEndedDate", "invalid");
 		}
 		
 		return "game";
@@ -137,6 +140,8 @@ public class HomeController {
 		if (currentGame.isEnded() || !gameEndDate.before(today)) {
 			return "redirect:/game/" + gameId;
 		}
+		
+		playerDAO.removeAllUnjoined(gameId);
 		
 		Map<String, Double> stocks = new HashMap<>();
 		String[] stocksData = sellData.split("/");

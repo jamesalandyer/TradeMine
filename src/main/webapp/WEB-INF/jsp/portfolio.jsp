@@ -6,119 +6,122 @@
 <script type="text/javascript">
 	$(document).ready(
 			function() {
-				var playerPortfolios = $('.portfolio-item');
-				if (playerPortfolios.length > 0) {
-					var stockPrices = playerPortfolios
-							.map(function(index, item) {
-								var portfolio = $(item);
-								var stockSymbol = portfolio.data('symbol');
-								var shares = portfolio.data('shares');
-								getPriceForStock(stockSymbol, shares, function(
-										formattedPriceStr, totalPrice, error) {
-									var replace = $('#' + stockSymbol);
-									if (error) {
-										replace.text(error);
-									} else {
-										addToTotalMoneyString(totalPrice,
-												$('#portfolioTotal'));
-										replace.text(formattedPriceStr);
-									}
+				if (${!gameEnded}) {
+					var playerPortfolios = $('.portfolio-item');
+					if (playerPortfolios.length > 0) {
+						var stockPrices = playerPortfolios
+								.map(function(index, item) {
+									var portfolio = $(item);
+									var stockSymbol = portfolio.data('symbol');
+									var shares = portfolio.data('shares');
+									getPriceForStock(stockSymbol, shares, function(
+											formattedPriceStr, totalPrice, error) {
+										var replace = $('#' + stockSymbol);
+										if (error) {
+											replace.text(error);
+										} else {
+											addToTotalMoneyString(totalPrice,
+													$('#portfolioTotal'));
+											replace.text(formattedPriceStr);
+										}
+									});
 								});
-							});
-				}
-				$('.fixed-action-btn').floatingActionButton();
-				$('.modal').modal({
-					dismissible: true,
-					onCloseEnd: function() {
-						$('#price').val('');
-						var optionsSelect = $('#shares-amount');
-						optionsSelect.html('<option value="" disabled selected>Not Enough Money</option>');
-						optionsSelect.formSelect();
-						var ticker = $('#stockTicker');
-						ticker.val('');
-						ticker.removeAttr('readonly');
-						var submit = $('#submit-purchase');
-						submit.attr('disabled', 'disabled');
-						submit.text('Search');
-						$('#priceValue').attr('hidden', 'hidden');
-						$('#share-select').attr('hidden', 'hidden');
 					}
-				});
-				$('select').formSelect();
-				$('.sell-button').on('click', function(event) {
-					var el = $(event.delegateTarget);
-					var stockSymbol = el.data('stock');
-					var sharesAmount = el.data('shares');
-					$('#stockTickerSale').val(stockSymbol);
-					findStockPrice(stockSymbol, function(price, error) {
-						if (error) {
-							$('#price-sell').val(error);
-						} else {
-							$('#price-sell').val(price);
+					$('.fixed-action-btn').floatingActionButton();
+					$('.modal').modal({
+						dismissible: true,
+						onCloseEnd: function() {
+							$('#price').val('');
+							var optionsSelect = $('#shares-amount');
+							optionsSelect.html('<option value="" disabled selected>Not Enough Money</option>');
+							optionsSelect.formSelect();
+							var ticker = $('#stockTicker');
+							ticker.val('');
+							ticker.removeAttr('readonly');
+							var submit = $('#submit-purchase');
+							submit.attr('disabled', 'disabled');
+							submit.text('Search');
+							$('#priceValue').attr('hidden', 'hidden');
+							$('#share-select').attr('hidden', 'hidden');
 						}
 					});
-					var optionsSelect = $('#shares-sell');
-					var optionsStr = '';
-					for (var i = 1; i <= sharesAmount; i++) {
-						var selected = (i == 1);
-						optionsStr += '<option value="' + i + '"' + (selected ? ' selected ' : '') + '>' + i + ' Share' + ((i > 1) ? 's' : '') + '</option>';
-					}
-					optionsSelect.html(optionsStr);
-					optionsSelect.formSelect();
-					$('#submit-sell').removeAttr('disabled');
-				});
-				$('#submit-sell').click(function(event) {
-					$('#sellForm').submit();
-				})
-				$('#stockTicker').on('change paste keyup', function(event) {
-					if (event.target.value.length > 0) {
-						$('#tickerInvalid').attr('hidden', 'hidden');
-						$('#submit-purchase').removeAttr('disabled');
-					} else {
-						$('#submit-purchase').attr('disabled', 'disabled');
-					}
-				});
-				$('#submit-purchase').click(function(event) {
-					var submit = $(event.target);
-					if (submit.text() === 'Search') {
-						var ticker = $('#stockTicker');
-						var stockSymbol = ticker.val();
-						if (stockSymbol !== '') {
-							ticker.attr('readonly', 'readonly');
-							submit.attr('disabled', 'disabled');
-							submit.text('Purchase');
-							findStockPrice(stockSymbol, function(price, error) {
-								if (error) {
-									ticker.removeAttr('readonly');
-									submit.text('Search');
-									$('#tickerInvalid').removeAttr('hidden');
-								} else {
-									var amountLeft = ${gamePlayer.amountLeft};
-									var availableOptions = Math.floor(Number(amountLeft) / Number(price));
-									if (availableOptions > 0) {
-										var priceLabel = $('#price');
-										priceLabel.val(Number(price));
-										$('#priceValue').removeAttr('hidden');
-										var optionsSelect = $('#shares-amount');
-										var optionsStr = '';
-										for (var i = 1; i <= availableOptions; i++) {
-											var selected = (i == 1);
-											optionsStr += '<option value="' + i + '"' + (selected ? ' selected ' : '') + '>' + i + ' Share' + ((i > 1) ? 's' : '') + '</option>';
-										}
-										optionsSelect.html(optionsStr);
-										optionsSelect.formSelect();
-										submit.removeAttr('disabled');
-									}
-									$('#share-select').removeAttr('hidden');
-								}
-							});
+					$('select').formSelect();
+					$('.sell-button').on('click', function(event) {
+						var el = $(event.delegateTarget);
+						var stockSymbol = el.data('stock');
+						var sharesAmount = el.data('shares');
+						$('#stockTickerSale').val(stockSymbol);
+						findStockPrice(stockSymbol, function(price, error) {
+							if (error) {
+								$('#price-sell').val(error);
+							} else {
+								$('#price-sell').val(price);
+							}
+						});
+						var optionsSelect = $('#shares-sell');
+						var optionsStr = '';
+						for (var i = 1; i <= sharesAmount; i++) {
+							var selected = (i == 1);
+							optionsStr += '<option value="' + i + '"' + (selected ? ' selected ' : '') + '>' + i + ' Share' + ((i > 1) ? 's' : '') + '</option>';
 						}
-					} else {
-						$('#purchaseForm').submit();
-					}
-				});
+						optionsSelect.html(optionsStr);
+						optionsSelect.formSelect();
+						$('#submit-sell').removeAttr('disabled');
+					});
+					$('#submit-sell').click(function(event) {
+						$('#sellForm').submit();
+					})
+					$('#stockTicker').on('change paste keyup', function(event) {
+						if (event.target.value.length > 0) {
+							$('#tickerInvalid').attr('hidden', 'hidden');
+							$('#submit-purchase').removeAttr('disabled');
+						} else {
+							$('#submit-purchase').attr('disabled', 'disabled');
+						}
+					});
+					$('#submit-purchase').click(function(event) {
+						var submit = $(event.target);
+						if (submit.text() === 'Search') {
+							var ticker = $('#stockTicker');
+							var stockSymbol = ticker.val();
+							if (stockSymbol !== '') {
+								ticker.attr('readonly', 'readonly');
+								submit.attr('disabled', 'disabled');
+								submit.text('Purchase');
+								findStockPrice(stockSymbol, function(price, error) {
+									if (error) {
+										ticker.removeAttr('readonly');
+										submit.text('Search');
+										$('#tickerInvalid').removeAttr('hidden');
+									} else {
+										var amountLeft = ${gamePlayer.amountLeft};
+										var availableOptions = Math.floor(Number(amountLeft) / Number(price));
+										if (availableOptions > 0) {
+											var priceLabel = $('#price');
+											priceLabel.val(Number(price));
+											$('#priceValue').removeAttr('hidden');
+											var optionsSelect = $('#shares-amount');
+											var optionsStr = '';
+											for (var i = 1; i <= availableOptions; i++) {
+												var selected = (i == 1);
+												optionsStr += '<option value="' + i + '"' + (selected ? ' selected ' : '') + '>' + i + ' Share' + ((i > 1) ? 's' : '') + '</option>';
+											}
+											optionsSelect.html(optionsStr);
+											optionsSelect.formSelect();
+											submit.removeAttr('disabled');
+										}
+										$('#share-select').removeAttr('hidden');
+									}
+								});
+							}
+						} else {
+							$('#purchaseForm').submit();
+						}
+					});
+				}
 			});
 </script>
+<c:if test="${!gameEnded}">
 <div id="buyStock" class="modal modal-fixed-footer">
 	<div class="modal-content">
 		<div class="row">
@@ -204,7 +207,13 @@
 			class="waves-effect waves-teal btn" disabled>Sell</a>
 	</div>
 </div>
-
+<div class="fixed-action-btn">
+	<a
+		class="waves-effect waves-light btn-floating btn-large teal btn modal-trigger"
+		href="#buyStock"> <i class="large material-icons">add</i>
+	</a>
+</div>
+</c:if>
 <div class="row">
 	<div class="col s12 m8 grey-text text-darken-3">
 		<h3>
@@ -237,13 +246,13 @@
 			class="title"><c:out value="${playerPortfolio.stockSymbol}" /></span><br />
 			<p>
 				<c:out value="${playerPortfolio.shares}" />
-				<c:out value="${playerPortfolio.shares > 1 ? ' Shares': 'Share'}" />
+				<c:out value="${playerPortfolio.shares != 1 ? ' Shares': 'Share'}" />
 			</p>
 			<div class="secondary-content right">
-				<h5 id="${playerPortfolio.stockSymbol}" class="inline-right">Loading...</h5><a href="#sellStock"
+				<h5 id="${playerPortfolio.stockSymbol}" class="${(gameEnded) ? 'equal-margin' : 'inline-right'}"><c:out value="${(gameEnded) ? '$0.00' : 'Loading...'}" /></h5><c:if test="${!gameEnded}"><a href="#sellStock"
 							data-stock="${playerPortfolio.stockSymbol}" data-shares="${playerPortfolio.shares}"
 							class="btn-floating btn-small waves-effect waves-light teal bottom-margin modal-trigger sell-button"><i
-							class="material-icons">close</i></a>
+							class="material-icons">close</i></a></c:if>
 			</div></li>
 	</c:forEach>
 </c:when>
@@ -260,11 +269,5 @@
 </c:otherwise>
 </c:choose>
 </ul>
-<div class="fixed-action-btn">
-	<a
-		class="waves-effect waves-light btn-floating btn-large teal btn modal-trigger"
-		href="#buyStock"> <i class="large material-icons">add</i>
-	</a>
-</div>
 
 <c:import url="/WEB-INF/jsp/common/footer.jsp" />

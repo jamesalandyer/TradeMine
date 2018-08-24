@@ -19,5 +19,7 @@ public interface PlayerDAO {
 	public Player getPlayerForGame(Long userId, Long gameId);
 	
 	public List<String> getPlayerBalanceForGames(Long userId);
+
+	public void removeAllUnjoined(Long gameId);
 	
 }

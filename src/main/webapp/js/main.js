@@ -28,15 +28,20 @@ var findStockPrice = function(stockSymbol, callback, date) {
 	var foundStock = localStorage.getItem(stockSymbol);
 	var adjustedDate;
 	if (date) {
-		adjustedDate = moment(date);
+		console.log(date);
+		adjustedDate = date;
+		console.log(adjustedDate);
 		if (adjustedDate.weekday === 0) {
 			adjustedDate = adjustedDate.subtract(2, 'days');
+			console.log(adjustedDate);
 		} else if (adjustedDate.weekday === 6) {
 			adjustedDate = adjustedDate.subtract(1, 'days');
+			console.log(adjustedDate);
 		}
 	}
 	if (foundStock) {
 		var today = moment().format('YYYY-MM-DD');
+		console.log(adjustedDate);
 		if (!adjustedDate) {
 			if (moment().weekday() === 0) {
 				adjustedDate = today.subtract(2, 'days');
@@ -44,6 +49,7 @@ var findStockPrice = function(stockSymbol, callback, date) {
 				adjustedDate = today.subtract(1, 'days');
 			}
 		}
+		console.log(adjustedDate);
 		if (adjustedDate) {
 			adjustedDate = adjustedDate.format('YYYY-MM-DD');
 		}

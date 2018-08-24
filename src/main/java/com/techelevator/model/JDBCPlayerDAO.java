@@ -126,5 +126,11 @@ public class JDBCPlayerDAO implements PlayerDAO {
 		}
 		return player;
 	}
+
+	@Override
+	public void removeAllUnjoined(Long gameId) {
+		String sqlDeletePlayers = "DELETE FROM player WHERE game_id = ? AND joined IS FALSE";
+		jdbcTemplate.update(sqlDeletePlayers, gameId);
+	}
 	
 }

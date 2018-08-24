@@ -9,7 +9,7 @@
 				$('.modal').modal();
 				$('.datepicker').datepicker({
 					container : 'body',
-					minDate : new Date()
+					minDate : moment().add(7, 'days').toDate()
 				});
 				$('.fixed-action-btn').floatingActionButton();
 				$("#createGame").click(
